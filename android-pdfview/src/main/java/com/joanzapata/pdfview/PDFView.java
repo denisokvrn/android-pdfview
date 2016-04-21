@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.view.SurfaceView;
 import com.joanzapata.pdfview.exception.FileNotFoundException;
 import com.joanzapata.pdfview.listener.OnDrawListener;
+import com.joanzapata.pdfview.listener.OnErrorListener;
 import com.joanzapata.pdfview.listener.OnLoadCompleteListener;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
 import com.joanzapata.pdfview.model.PagePart;
@@ -153,6 +154,8 @@ public class PDFView extends SurfaceView {
 
     /** Call back object to call when the above layer is to drawn */
     private OnDrawListener onDrawListener;
+
+    private OnErrorListener onErrorListener;
 
     /** Paint object for drawing */
     private Paint paint;
@@ -294,6 +297,11 @@ public class PDFView extends SurfaceView {
     private void setOnDrawListener(OnDrawListener onDrawListener) {
         this.onDrawListener = onDrawListener;
     }
+
+    private void setOnErrorListener(OnErrorListener onErrorListener) {
+        this.onErrorListener = onErrorListener;
+    }
+
 
     public void recycle() {
 
@@ -657,6 +665,12 @@ public class PDFView extends SurfaceView {
         }
     }
 
+    public void onErrorDecode() {
+        if (onErrorListener != null) {
+            onErrorListener.onError();
+        }
+    }
+
     /**
      * Called when a rendering task is over and
      * a PagePart has been freshly created.
@@ -987,9 +1001,11 @@ public class PDFView extends SurfaceView {
 
         private boolean enableSwipe = true;
 
-	private boolean enableDoubletap = true ;
+	    private boolean enableDoubletap = true ;
 
         private OnDrawListener onDrawListener;
+
+        private OnErrorListener onErrorListener;
 
         private OnLoadCompleteListener onLoadCompleteListener;
 
@@ -1029,6 +1045,11 @@ public class PDFView extends SurfaceView {
             return this;
         }
 
+        public Configurator onError(OnErrorListener onErrorListener) {
+            this.onErrorListener = onErrorListener;
+            return this;
+        }
+
         public Configurator onLoad(OnLoadCompleteListener onLoadCompleteListener) {
             this.onLoadCompleteListener = onLoadCompleteListener;
             return this;
@@ -1063,6 +1084,7 @@ public class PDFView extends SurfaceView {
         public void load() {
             PDFView.this.recycle();
             PDFView.this.setOnDrawListener(onDrawListener);
+            PDFView.this.setOnErrorListener(onErrorListener);
             PDFView.this.setOnPageChangeListener(onPageChangeListener);
             PDFView.this.enableSwipe(enableSwipe);
             PDFView.this.enableDoubletap(enableDoubletap);

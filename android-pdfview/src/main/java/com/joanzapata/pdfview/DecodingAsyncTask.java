@@ -34,6 +34,7 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Void> {
     private DecodeService decodeService;
 
     private boolean cancelled;
+    private boolean error;
 
     private Uri uri;
 
@@ -47,15 +48,26 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-        decodeService = new DecodeServiceBase(new PdfContext());
-        decodeService.setContentResolver(pdfView.getContext().getContentResolver());
-        decodeService.open(uri);
+        try {
+            decodeService = new DecodeServiceBase(new PdfContext());
+            decodeService.setContentResolver(pdfView.getContext().getContentResolver());
+            decodeService.open(uri);
+        } catch (Exception ex) {
+            if (ex != null) {
+                ex.printStackTrace();
+            }
+            error = true;
+        }
         return null;
     }
 
     protected void onPostExecute(Void result) {
         if (!cancelled) {
-            pdfView.loadComplete(decodeService);
+            if (error) {
+                pdfView.onErrorDecode();
+            } else {
+                pdfView.loadComplete(decodeService);
+            }
         }
     }
 
